@@ -65,6 +65,21 @@
       background:var(--navy);color:#fff;padding:12px 18px;border-radius:9px;
       font-size:13px;font-weight:800;white-space:nowrap
     }
+    .menu-toggle{
+      display:none;width:42px;height:42px;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+      background:#fff;border:1px solid var(--line);border-radius:9px;cursor:pointer;padding:0
+    }
+    .menu-toggle span{display:block;width:20px;height:2px;background:var(--navy);border-radius:2px;transition:.25s}
+    .menu-toggle.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+    .menu-toggle.open span:nth-child(2){opacity:0}
+    .menu-toggle.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+    .nav-phone{display:none}
+    .drawer-overlay{
+      position:fixed;inset:0;z-index:980;background:rgba(6,28,45,.5);
+      opacity:0;pointer-events:none;transition:opacity .3s
+    }
+    .drawer-overlay.show{opacity:1;pointer-events:auto}
+    body.no-scroll{overflow:hidden}
     .hero{
       min-height:550px;
       color:#fff;
@@ -220,10 +235,25 @@
       .step:nth-child(3):after{display:none}
       .proof-grid{grid-template-columns:1fr}
     }
-    @media(max-width:720px){
-      .topbar{height:auto;padding:12px 0;flex-wrap:wrap}
-      nav{order:3;width:100%;overflow:auto;padding-bottom:3px;justify-content:flex-start}
-      .phone{font-size:11px;padding:9px 12px}
+    @media(max-width:768px){
+      .brand{flex:1;min-width:0}
+      .menu-toggle{display:flex}
+      .topbar .phone{display:none}
+      nav{
+        position:fixed;top:0;right:0;bottom:0;z-index:990;
+        width:min(300px,82vw);height:100vh;height:100dvh;
+        flex-direction:column;align-items:stretch;justify-content:flex-start;gap:0;
+        background:#fff;box-shadow:-10px 0 35px rgba(7,35,57,.2);
+        padding:86px 24px 28px;overflow-y:auto;
+        transform:translateX(105%);transition:transform .32s cubic-bezier(.4,0,.2,1)
+      }
+      nav.open{transform:translateX(0)}
+      nav a{
+        padding:15px 0;border-bottom:1px solid var(--line);
+        font-size:15px;display:flex;align-items:center;justify-content:space-between
+      }
+      nav a:hover{color:var(--blue)}
+      .nav-phone{display:flex;margin-top:20px;background:var(--navy);color:#fff;border-radius:9px;padding:13px 16px;justify-content:center;font-size:14px}
       .hero,.hero-inner{min-height:620px}
       .hero-copy{padding:55px 0}
       h1{font-size:39px}
@@ -252,17 +282,20 @@
         <span class="brand-mark"></span>
         <span><strong>精準地測</strong><small>專業土地測量服務</small></span>
       </a>
-      <nav aria-label="主選單">
+      <button class="menu-toggle" aria-label="開啟選單" aria-expanded="false" aria-controls="main-nav"><span></span><span></span><span></span></button>
+      <nav id="main-nav" aria-label="主選單">
         <a class="active" href="#home">首頁</a>
         <a href="#services">服務項目</a>
         <a href="#cases">工程案例</a>
         <a href="#equipment">設備介紹</a>
         <a href="#about">關於我們</a>
         <a href="#faq">常見問題</a>
+        <a class="nav-phone" href="tel:0900000000">☎ 立即聯繫 09xx-xxx-xxx</a>
       </nav>
       <a class="phone" href="tel:0900000000">☎ 立即聯繫 09xx-xxx-xxx</a>
     </div>
   </header>
+  <div class="drawer-overlay"></div>
 
   <main>
     <section class="hero" id="home">
@@ -439,6 +472,24 @@
         button.querySelector("span").textContent = item.classList.contains("open") ? "－" : "＋";
       });
     });
+
+    const drawerToggle = document.querySelector(".menu-toggle");
+    const drawerNav = document.getElementById("main-nav");
+    const drawerOverlay = document.querySelector(".drawer-overlay");
+
+    function setMenu(open) {
+      drawerNav.classList.toggle("open", open);
+      drawerToggle.classList.toggle("open", open);
+      drawerOverlay.classList.toggle("show", open);
+      document.body.classList.toggle("no-scroll", open);
+      drawerToggle.setAttribute("aria-expanded", open);
+      drawerToggle.setAttribute("aria-label", open ? "關閉選單" : "開啟選單");
+    }
+
+    drawerToggle.addEventListener("click", () => setMenu(!drawerNav.classList.contains("open")));
+    drawerOverlay.addEventListener("click", () => setMenu(false));
+    drawerNav.querySelectorAll("a").forEach(a => a.addEventListener("click", () => setMenu(false)));
+    document.addEventListener("keydown", e => { if (e.key === "Escape") setMenu(false); });
   </script>
 </body>
 </html>
